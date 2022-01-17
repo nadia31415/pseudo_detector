@@ -1,0 +1,24 @@
+﻿Programming assessment: 11/1/22
+
+
+
+
+Now look at APIs - search for a genomic position using an api then checks whether there is a pseudogene or sequence duplication elsewhere in the genome. Clinical scientists find that it would speed up their work when they interpret variants from NGS, rather than having to check manually.
+* What pseudogenes/duplication (how are these defined to be queried in the programme)
+
+
+Basic programme outline:
+* insert either a genomic position or genomic interval, 
+* then the program will check in the UCSC REST API sequence duplication track if that genomic position-interval has a sequence duplication in the genome, 
+* and if it does, it will give back its genomic coordinates.
+
+
+-input, bed file or genomic position as string
+-dictionary of tracks/duplicates (duplication track to dictionary)
+- list of duplicates and regions
+-output is value from dictionary
+1. Github repository (create_pseudo)
+2. Api work out track
+3. Upload duplicates txt and script to query UCSC database (sql file) onto github
+4. API has .sql file (to modify database structures, file in github is specific for gr38) and .txt file for  putative duplicates 
+5. Create a dictionary for duplicates (for all putative duplicates, are there more clinically significant duplicates to specific chromosomes to begin with e.g chr 22 due to highly homologous duplications? )
