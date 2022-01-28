@@ -43,13 +43,30 @@ print(type(roi))							   # I will work on this position for the time being as I
 df= pd.DataFrame(roi)      # this make life much easier
 print(df)
 
-''' While optimisong the pandas part (vectorialisation etc.), focus on gene NF1, chr17 chromStart= 31212016, chromEnd= 31231713'''
-
+''' While optimising the pandas part (vectorisation etc.), focus on gene NF1, chr17 chromStart= 31212016, chromEnd= 31231713 - a region of 4 duplications'''
 
 # from this data frame, find if input is in the interval by vectorialisation, create an additional column of present-absent and by selcting columns and rows create a new data frame
 # which will be saved as .csv and this will be the final output of the script.
 # https://stackoverflow.com/questions/62646013/how-would-one-vectorize-over-a-pandas-dataframe-column-over-a-range-of-rows
 # https://pandas.pydata.org/docs/getting_started/intro_tutorials/03_subset_data.html       selecting rows and columns ~ tidyverse
+
+# position= given by user
+
+position= 83236265
+
+df.loc[(df['chromStart']<= position) & (df['chromEnd']>= position), 'Included in Dup interval']= 'Yes'
+
+print(df)
+print(df.loc[df['Included in Dup interval']=='Yes'])
+
+# now print/save (as csv) a new dataframe containing the rows that have a Yes value in the last column, 
+# and a chrom, chromStart, chromEnd, strand, otherChrom, otherStart, otherEnd, 'fracMatch'
+
+df1= (df.loc[df['Included in Dup interval']=='Yes'])[['chrom', 'chromStart', 'chromEnd', 'name', 'strand', 'otherChrom', 'otherStart', 'otherEnd', 'fracMatch']]
+
+print(df1)
+
+
 
 
 # dup_track= requests.get('https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups').text
@@ -68,7 +85,7 @@ url = f'https://api.genome.ucsc.edu/getData/sequence?genome={build};chrom={chrom
 
 
 
-print(type(dup_track))
+# print(type(dup_track))
 
 
 # not super-relevant now
