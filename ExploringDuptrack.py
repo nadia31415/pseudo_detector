@@ -2,13 +2,13 @@
 # getting the proper files from the UCSC REST-API
 # parsing them, getting the proper sequence intervals
 
-### 1: getting the proper JSON API. 
+### 1: getting the proper JSON API.
 # gleaning through this page:
 # http://genome-euro.ucsc.edu/goldenPath/help/api.html
 # I came up with the following command to get what we need, and store it a json file.
 
 ##  :~$ wget -O- 'https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups' > pseudo_detector/genomicSuperDups.json
-## but upon furthr thinking I figured that we should insert the downloading and verification of the database in the script
+## but upon further thinking I figured that we should insert the downloading and verification of the database in the script
 
 # Here I will now write some python code to begin to parse through it
 # general idea on what I need to do here (among many other resources):
@@ -29,13 +29,13 @@ myjson = dup_track.json()       # transform dup_track into a json file
 type(myjson)
 # myjson is a dictionary
 # to see the structure in a helpful graphical rendition, insert https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups
-# in the url section of a Firefox browser window. It's a dictionary with 9 items (downloadtime, downloadTimeStamp ...) 
+# in the url section of a Firefox browser window. It's a dictionary with 9 items (downloadtime, downloadTimeStamp ...)
 # the critical one is genomicSuperDups, which is itself a dictionary with 640 keys (strings) and values (lists). The vast majority of these items have keys indicating
-# patch names and have no value -empty list []; some, namely the chr1 thrugh 22, chrX anf chrY, have values consisting of a list of dictionaries (up to thousands per chromosome). 
+# patch names and have no value -empty list []; some, namely the chr1 through 22, chrX anf chrY, have values consisting of a list of dictionaries (up to thousands per chromosome). 
 # Each of these dictionaries represents a region of duplication: the key is just a progressive number, the value is a dictionary with keys that include
-# chrom, chromStart, chromEnd, otherChrom, otherStart, otherEnd. Pandas can transform these lists of dictionaries into dataframes, where columns are 
+# chrom, chromStart, chromEnd, otherChrom, otherStart, otherEnd. Pandas can transform these lists of dictionaries into dataframes, where columns are
 # chromStart, chromEnd, otherChrom, otherStart, otherEnd etc... and rows are the 1 to n instances of duplicated regions.
-# The advantage of having dataframes is vectorialisation (see below), which allow to go through it real fast 
+# The advantage of having dataframes is vectorialisation (see below), which allow to go through it real fast
 
 
 roi= myjson['genomicSuperDups']['chr17']       # the chr will be given by the user from the argpare; see import_argparse.py (single position to begin with, we'll worry about bed files later)
@@ -74,7 +74,7 @@ print(type(dup_track))
 # not super-relevant now
 def ucsc_api(url):
 	'''Query UCSC api for ref and alt DNA seq'''
-	r = requests.get(url) 
+	r = requests.get(url)
 	myjson = r.json()
 	return(myjson['dna']) # return(myjson['genomicSuperDups'])? maybe at this stage I could filter out the empty patches annotations
 
@@ -112,7 +112,7 @@ def ucsc_api(url):
 #     listnumber= 0
 #     nonlistnumber= 0
 #     for key, value in dictionary.items():
-#         #print (type(value)) 
+#         #print (type(value))
 #         if type(value) != list:
 #             print(key, ' value not a list')
 #             nonlistnumber+= 1
