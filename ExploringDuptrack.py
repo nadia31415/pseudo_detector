@@ -22,7 +22,7 @@ import requests
 import argparse
 import pandas as pd
 
-# parse arguments from command line
+### 2: parse arguments from command line
 # check out https://towardsdatascience.com/a-simple-guide-to-command-line-arguments-with-argparse-6824c30ab1c3
 parser = argparse.ArgumentParser(
     description="A script intended to find whether a genomic position or interval given by the user is found in a duplicated genomic region")
@@ -58,10 +58,18 @@ type(myjson)
 # The advantage of having dataframes is vectorialisation (see below), which allow to go through it real fast 
 
 
-# the chr will be given by the user from the argpare; see import_argparse.py (single position to begin with, we'll worry about bed files later); use chr17, 83236265 for test
+# the chr will be given by the user from the argparse; see import_argparse.py (single position to begin with, we'll worry about bed files later); use chr17, 83236265 for test
 roi= myjson['genomicSuperDups']['chr'+ args.chromosome]
-print(type(roi))							   # I will work on this position for the time being as I work out the following steps. I will worry about input later
-df= pd.DataFrame(roi)      					   # this make life much easier
+print(type(roi))			# it's a list of dictionaries (keys: 1 to 2846 - instances of duplicated sequence in chromosome 17). 
+							# The values of each are dictionaries with 30 items: keys are 'bin', 'chrom', 'chromStart' ... 'jck', 'k2k'
+												   
+
+### 3. transform the list of dictionaries into a data frame 
+
+# This list of dictionaries can be turned into a pandas data frame in which rows are instances of duplication (1 to 2846)
+# columns are the 30 items, with column name = keys
+
+df= pd.DataFrame(roi)      					   # list of dictionaries is transformed in pandas dataframe
 print(df)
 
 ''' While optimising the pandas part (vectorisation etc.), focus on gene NF1, chr17 chromStart= 31212016, chromEnd= 31231713 - a region of 4 duplications'''
@@ -72,8 +80,8 @@ print(df)
 # https://pandas.pydata.org/docs/getting_started/intro_tutorials/03_subset_data.html       selecting rows and columns ~ tidyverse
 
 # position= given by user
-
 # position= 83236265
+
 position= args.beginning
 
 df.loc[(df['chromStart']<= position) & (df['chromEnd']>= position), 'Included in Dup interval']= 'Yes'
@@ -131,36 +139,6 @@ def ucsc_api(url):
 
 # type(d_track)
 
-# ################ Parsing the dictionary
-
-# print(dup.keys())
-# type(dup['genomicSuperDups']) #genomicSuperDups is a dictionary
-
-# print(dup['genomicSuperDups'].keys())
-# keys= list(dup['genomicSuperDups'].keys())
-# print(keys[0])
-# print(type(keys[0]))
-# len(keys)
-# # genomicSupeDups is a dictionary whose 640 keys are strings representing chromosomal annotations
-
-
-
-# print(dup['genomicSuperDups'].values())
-
-# def listvalues(dictionary):
-#     listnumber= 0
-#     nonlistnumber= 0
-#     for key, value in dictionary.items():
-#         #print (type(value)) 
-#         if type(value) != list:
-#             print(key, ' value not a list')
-#             nonlistnumber+= 1
-#         elif (type(value)) == list:
-#             print(key, ' IS A LIST')
-#             listnumber+=1
-#     print('there are ', listnumber, 'lists, and ', nonlistnumber, ' non-list values')
-
-# listvalues(dup['genomicSuperDups'])
 
 
 
