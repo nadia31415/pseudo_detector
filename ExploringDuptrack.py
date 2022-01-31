@@ -19,7 +19,27 @@
 
 import json
 import requests
+import argparse
 import pandas as pd
+
+# parse arguments from command line
+# check out https://towardsdatascience.com/a-simple-guide-to-command-line-arguments-with-argparse-6824c30ab1c3
+parser = argparse.ArgumentParser(
+    description="A script intended to find whether a genomic position or interval given by the user is found in a duplicated genomic region")
+parser.add_argument("-c", "--chromosome", required=True, type=str,
+                    help=
+					"chromosome in which the genetic position lies [1 through 22, X, Y, M]")
+parser.add_argument("-b", "--beginning", required=True,  type=int,
+					help=
+					"genomic position, or beginnig of a segment, if an interval is supplied")
+parser.add_argument("-e", "--end",  required=False, type=int,
+					help=
+					"end of a genomic segment, if an interval is supplied")
+
+# parse the arguments
+
+args = parser.parse_args()
+
 
 dup_track= requests.get('https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups')
 type(dup_track)
@@ -38,9 +58,10 @@ type(myjson)
 # The advantage of having dataframes is vectorialisation (see below), which allow to go through it real fast 
 
 
-roi= myjson['genomicSuperDups']['chr17']       # the chr will be given by the user from the argpare; see import_argparse.py (single position to begin with, we'll worry about bed files later)
+# the chr will be given by the user from the argpare; see import_argparse.py (single position to begin with, we'll worry about bed files later); use chr17, 83236265 for test
+roi= myjson['genomicSuperDups']['chr'+ args.chromosome]
 print(type(roi))							   # I will work on this position for the time being as I work out the following steps. I will worry about input later
-df= pd.DataFrame(roi)      # this make life much easier
+df= pd.DataFrame(roi)      					   # this make life much easier
 print(df)
 
 ''' While optimising the pandas part (vectorisation etc.), focus on gene NF1, chr17 chromStart= 31212016, chromEnd= 31231713 - a region of 4 duplications'''
@@ -52,7 +73,8 @@ print(df)
 
 # position= given by user
 
-position= 83236265
+# position= 83236265
+position= args.beginning
 
 df.loc[(df['chromStart']<= position) & (df['chromEnd']>= position), 'Included in Dup interval']= 'Yes'
 
@@ -66,7 +88,7 @@ df1= (df.loc[df['Included in Dup interval']=='Yes'])[['chrom', 'chromStart', 'ch
 
 print(df1)
 
-
+# save as csv
 
 
 # dup_track= requests.get('https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups').text
