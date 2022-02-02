@@ -2,7 +2,11 @@
 # getting the proper files from the UCSC REST-API
 # parsing them, getting the proper sequence intervals
 
+
+### getting the proper JSON API. 
+
 ### 1: getting the proper JSON API.
+
 # gleaning through this page:
 # http://genome-euro.ucsc.edu/goldenPath/help/api.html
 # I came up with the following command to get what we need, and store it a json file.
@@ -19,7 +23,32 @@
 
 import json
 import requests
+import argparse
 import pandas as pd
+
+### 1: parse arguments from command line
+# check out https://towardsdatascience.com/a-simple-guide-to-command-line-arguments-with-argparse-6824c30ab1c3
+parser = argparse.ArgumentParser(
+    description="A script intended to find whether a genomic position or interval given by the user is found in a duplicated genomic region")
+parser.add_argument("-c", "--chromosome", required=True, type=str,
+                    help=
+					"chromosome in which the genetic position lies [1 through 22, X, Y, M]")
+parser.add_argument("-b", "--beginning", required=True,  type=int,
+					help=
+					"genomic position, or beginnig of a segment, if an interval is supplied")
+parser.add_argument("-e", "--end",  required=False, type=int,
+					help=
+					"end of a genomic segment, if an interval is supplied")
+
+# parse the arguments
+
+args = parser.parse_args()
+
+### 2. Check if the locally downloaded version of the json is up-to-date. If not, download a new version
+
+# the check for how up to date the json file will ahve to be here, with an if statement:
+
+# if not up to date:
 
 dup_track= requests.get('https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups')
 type(dup_track)
@@ -38,18 +67,46 @@ type(myjson)
 # The advantage of having dataframes is vectorialisation (see below), which allow to go through it real fast
 
 
-roi= myjson['genomicSuperDups']['chr17']       # the chr will be given by the user from the argpare; see import_argparse.py (single position to begin with, we'll worry about bed files later)
-print(type(roi))							   # I will work on this position for the time being as I work out the following steps. I will worry about input later
-df= pd.DataFrame(roi)      # this make life much easier
-print(df)
+# the chr will be given by the user from the argparse; see import_argparse.py (single position to begin with, we'll worry about bed files later); use chr17, 83236265 for test
+roi= myjson['genomicSuperDups']['chr'+ args.chromosome]
+# print(type(roi))			# it's a list of dictionaries (keys: 1 to 2846 - instances of duplicated sequence in chromosome 17). 
+							# The values of each are dictionaries with 30 items: keys are 'bin', 'chrom', 'chromStart' ... 'jck', 'k2k'
+												   
 
-''' While optimisong the pandas part (vectorialisation etc.), focus on gene NF1, chr17 chromStart= 31212016, chromEnd= 31231713'''
+### 3. transform the list of dictionaries into a data frame 
 
+# This list of dictionaries can be turned into a pandas data frame in which rows are instances of duplication (1 to 2846)
+# columns are the 30 items, with column name = keys
+
+df= pd.DataFrame(roi)      					   # list of dictionaries is transformed in pandas dataframe
+# print(df)
+
+''' While optimising the pandas part (vectorisation etc.), focus on gene NF1, chr17 chromStart= 31212016, chromEnd= 31231713 - a region of 4 duplications'''
 
 # from this data frame, find if input is in the interval by vectorialisation, create an additional column of present-absent and by selcting columns and rows create a new data frame
 # which will be saved as .csv and this will be the final output of the script.
 # https://stackoverflow.com/questions/62646013/how-would-one-vectorize-over-a-pandas-dataframe-column-over-a-range-of-rows
 # https://pandas.pydata.org/docs/getting_started/intro_tutorials/03_subset_data.html       selecting rows and columns ~ tidyverse
+
+# position= given by user
+# position= 83236265
+
+position= args.beginning
+
+# create a new column displaying a 'Yes' string for those duplicated regions that contain the genomic position provided by the user
+df.loc[(df['chromStart']<= position) & (df['chromEnd']>= position), 'Included in Dup interval']= 'Yes'
+
+# print(df)
+# print(df.loc[df['Included in Dup interval']=='Yes'])
+
+# now print/save (as csv) a new dataframe containing the rows that have a Yes value in the last column, 
+# and a chrom, chromStart, chromEnd, strand, otherChrom, otherStart, otherEnd, 'fracMatch'
+
+df1= (df.loc[df['Included in Dup interval']=='Yes'])[['chrom', 'chromStart', 'chromEnd', 'name', 'strand', 'otherChrom', 'otherStart', 'otherEnd', 'fracMatch']]
+
+print(df1)
+
+# save as csv
 
 
 # dup_track= requests.get('https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups').text
@@ -68,7 +125,7 @@ url = f'https://api.genome.ucsc.edu/getData/sequence?genome={build};chrom={chrom
 
 
 
-print(type(dup_track))
+# print(type(dup_track))
 
 
 # not super-relevant now
@@ -91,6 +148,7 @@ def ucsc_api(url):
 # d_track = requests.get('https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups').json()
 
 # type(d_track)
+
 
 # ################ Parsing the dictionary
 
@@ -122,6 +180,7 @@ def ucsc_api(url):
 #     print('there are ', listnumber, 'lists, and ', nonlistnumber, ' non-list values')
 
 # listvalues(dup['genomicSuperDups'])
+
 
 
 
