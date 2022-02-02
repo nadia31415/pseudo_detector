@@ -2,7 +2,7 @@
 # getting the proper files from the UCSC REST-API
 # parsing them, getting the proper sequence intervals
 
-### 1: getting the proper JSON API. 
+### getting the proper JSON API. 
 # gleaning through this page:
 # http://genome-euro.ucsc.edu/goldenPath/help/api.html
 # I came up with the following command to get what we need, and store it a json file.
@@ -22,7 +22,7 @@ import requests
 import argparse
 import pandas as pd
 
-### 2: parse arguments from command line
+### 1: parse arguments from command line
 # check out https://towardsdatascience.com/a-simple-guide-to-command-line-arguments-with-argparse-6824c30ab1c3
 parser = argparse.ArgumentParser(
     description="A script intended to find whether a genomic position or interval given by the user is found in a duplicated genomic region")
@@ -40,6 +40,11 @@ parser.add_argument("-e", "--end",  required=False, type=int,
 
 args = parser.parse_args()
 
+### 2. Check if the locally downloaded version of the json is up-to-date. If not, download a new version
+
+# the check for how up to date the json file will ahve to be here, with an if statement:
+
+# if not up to date:
 
 dup_track= requests.get('https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups')
 type(dup_track)
@@ -84,6 +89,7 @@ print(df)
 
 position= args.beginning
 
+# create a new column displaying a 'Yes' string for those duplicated regions that contain the genomic position provided by the user
 df.loc[(df['chromStart']<= position) & (df['chromEnd']>= position), 'Included in Dup interval']= 'Yes'
 
 print(df)
