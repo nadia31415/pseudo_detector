@@ -56,6 +56,11 @@ type(dup_track)
 
 myjson = dup_track.json()       # transform dup_track into a json file
 type(myjson)
+#if "chr22" in myjson: # check if appropriate keys exists in myjson dictionary
+#	print("This key exists in the json dict")
+#else:
+#	print("Error: Key does not exist in dict, review dictionary")
+
 # myjson is a dictionary
 # to see the structure in a helpful graphical rendition, insert https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups
 # in the url section of a Firefox browser window. It's a dictionary with 9 items (downloadtime, downloadTimeStamp ...)
