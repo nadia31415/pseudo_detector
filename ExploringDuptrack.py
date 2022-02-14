@@ -21,13 +21,25 @@
 
 # https://towardsdatascience.com/json-and-apis-with-python-fba329ef6ef0 is an even better resource
 
+### 1. import required packages
+
+import time
+import os
 import json
 import requests
 import argparse
 import pandas as pd
 
-### 1: parse arguments from command line
+start = time.time()
+
+### 2. get in the proper working direcory
+
+os.chdir("/home/giovanni/pseudo_detector")
+# os.getcwd()
+
+### 3: parse arguments from command line
 # check out https://towardsdatascience.com/a-simple-guide-to-command-line-arguments-with-argparse-6824c30ab1c3
+
 parser = argparse.ArgumentParser(
     description="A script intended to find whether a genomic position or interval given by the user is found in a duplicated genomic region")
 parser.add_argument("-c", "--chromosome", required=True, type=str,
@@ -44,19 +56,24 @@ parser.add_argument("-e", "--end",  required=False, type=int,
 
 args = parser.parse_args()
 
-### 2. Check if the locally downloaded version of the json is up-to-date. If not, download a new version
+### 4. Check whether the file containing the genomic coordinates of duplicated regions exists in the current directory.
+###    If it does not, download it from the UCSC API. The file is quite large (40 Mb) and having a local copy of it 
+###    speeds up the execution of the script by about 9 sec.
 
-# the check for how up to date the json file will ahve to be here, with an if statement:
 
-# if not up to date:
+url= "https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups"
 
-dup_track= requests.get('https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups')
-type(dup_track)
-# <class 'requests.models.Response'>
+try:	
+	myjson= json.load(open("genomicSuperDups.json"))
 
-myjson = dup_track.json()       # transform dup_track into a json file
-type(myjson)
-# myjson is a dictionary
+except FileNotFoundError:
+	print("File genomicSuperDups.json does not exist in the current directory; downloading from UCSC API.")
+	dup_track= requests.get(url, allow_redirects=True).json()
+	with open("genomicSuperDups.json", "w") as f:
+		json.dump(dup_track, f)
+	myjson= json.load(open("genomicSuperDups.json"))
+	
+
 # to see the structure in a helpful graphical rendition, insert https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups
 # in the url section of a Firefox browser window. It's a dictionary with 9 items (downloadtime, downloadTimeStamp ...)
 # the critical one is genomicSuperDups, which is itself a dictionary with 640 keys (strings) and values (lists). The vast majority of these items have keys indicating
@@ -73,10 +90,8 @@ roi= myjson['genomicSuperDups']['chr'+ args.chromosome]
 							# The values of each are dictionaries with 30 items: keys are 'bin', 'chrom', 'chromStart' ... 'jck', 'k2k'
 												   
 
-### 3. transform the list of dictionaries into a data frame 
+### 5. transform the list of dictionaries into a data frame 
 
-# This list of dictionaries can be turned into a pandas data frame in which rows are instances of duplication (1 to 2846)
-# columns are the 30 items, with column name = keys
 
 df= pd.DataFrame(roi)      					   # list of dictionaries is transformed in pandas dataframe
 # print(df)
@@ -106,8 +121,9 @@ df1= (df.loc[df['Included in Dup interval']=='Yes'])[['chrom', 'chromStart', 'ch
 
 print(df1)
 
+end = time.time()
+print("time elapsed: ", round(end - start, 4))
 # save as csv
-
 
 # dup_track= requests.get('https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups').text
 
