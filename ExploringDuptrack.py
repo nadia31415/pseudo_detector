@@ -60,7 +60,7 @@ except FileNotFoundError:
 #insert https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups
 #in the url section of a Firefox browser window. It's a dictionary with 9 items (downloadtime,
 #downloadTimeStamp, genomicSuperDups ...) genomicSuperDups is itself a dictionary with 640 keys
-#(strings) and values (lists). The items corresponding to """
+#(strings) and values (lists). The items corresponding to
 
 # the chr will be given by the user from the argparse; see import_argparse.py
 roi = myjson['genomicSuperDups']['chr' + args.chromosome]
