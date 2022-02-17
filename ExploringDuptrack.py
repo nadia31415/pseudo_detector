@@ -98,6 +98,9 @@ if not df1.empty:
 else:
 	print("The provided genomic position ", "chr"+ args.chromosome, position,  " does not lie within a duplicated region.")
 
+# 8. save dataframe as a csv file
+df1.to_csv('genomic_duplicates.csv', index=False)
+
 end = time.time()
 print("time elapsed: ", round(end - start, 4))
 
