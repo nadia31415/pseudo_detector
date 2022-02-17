@@ -1,5 +1,6 @@
-'''If a chromosomal position imputed by the user lies within a duplicated region in the genome,
-   this script will return the genomic coordinates of the duplicated region(s)
+'''If a chromosomal position imputed by the user lies within
+a duplicated region in the genome, this script will return
+the genomic coordinates of the duplicated region(s)
 '''
 
 
@@ -37,8 +38,9 @@ parser.add_argument("-p", "--position", required=True,  type=int,
 
 args = parser.parse_args()
 
-"""4. Check whether the file containing the genomic coordinates of duplicated regions exists in the current directory.
-If it does not, download it from the UCSC API. The file is quite large (40 Mb) and having a local copy of it
+"""4. Check whether the file containing the genomic coordinates of duplicated regions
+exists in the current directory.If it does not, download it from the UCSC API. The
+file is quite large (40 Mb) and having a local copy of it
 speeds up the execution of the script by about 9 sec.
 """
 
@@ -58,8 +60,9 @@ except FileNotFoundError:
 
 """to see the structure in a graphical rendition,
 insert https://genome-euro.ucsc.edu/cgi-bin/hubApi/getData/track?genome=hg38;track=genomicSuperDups
-in the url section of a Firefox browser window. It's a dictionary with 9 items (downloadtime, downloadTimeStamp, genomicSuperDups ...)
-genomicSuperDups is itself a dictionary with 640 keys (strings) and values (lists). The items corresponding to """
+in the url section of a Firefox browser window. It's a dictionary with 9 items (downloadtime,
+downloadTimeStamp, genomicSuperDups ...) genomicSuperDups is itself a dictionary with 640 keys
+(strings) and values (lists). The items corresponding to """
 
 # the chr will be given by the user from the argparse; see import_argparse.py
 roi= myjson['genomicSuperDups']['chr'+ args.chromosome]
@@ -67,11 +70,12 @@ roi= myjson['genomicSuperDups']['chr'+ args.chromosome]
 
 """ 5. transform the list of dictionaries into a data frame
 
-chr1 through 22, chrX anf chrY, have values consisting of a list of dictionaries (up to thousands per chromosome).
-Each of these dictionaries represents a region of duplication: the key is a progressive number, the value is a dictionary
-with keys that include chrom, chromStart, chromEnd, otherChrom, otherStart, otherEnd.
-Pandas can transform these lists of dictionaries into dataframes, where columns are chromStart, chromEnd, otherChrom, otherStart, otherEnd etc...
-and rows are the 1 to n instances of duplicated regions.
+chr1 through 22, chrX anf chrY, have values consisting of a list of dictionaries (up to thousands
+per chromosome).Each of these dictionaries represents a region of duplication: the key is a
+progressive number, the value is a dictionary with keys that include chrom, chromStart, chromEnd,
+otherChrom, otherStart, otherEnd.Pandas can transform these lists of dictionaries into dataframes,
+where columns are chromStart, chromEnd, otherChrom, otherStart, otherEnd etc... and rows are the 1
+to n instances of duplicated regions.
 The advantage of dataframes is vectorization (see below)
 """
 
